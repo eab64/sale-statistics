@@ -1,0 +1,11 @@
+{%  extends 'main.html' %}
+
+
+{% block content %}
+
+  <span><a  class="hello-msg" href="{% url 'all_sellers' %}" style="color:red">all sellers</a></span>
+  <span ><a  class="hello-msg" href="{% url 'last_10_sales' %}"style="color:red">last 10 sales</a></span>
+  <span ><a  class="hello-msg" href="{% url 'add_plan_to_seller' %}"style="color:red">add plan to seller</a></span>
+  <span ><a  class="hello-msg" href="{% url 'statistics' %}"style="color:red">watch statistics</a></span>
+
+{% endblock %}

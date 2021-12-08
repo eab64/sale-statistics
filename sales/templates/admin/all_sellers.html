@@ -4,8 +4,27 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
-<body>
-<h1>All sellers list</h1>
+<div class="row">
+    <div class="col-md">
+        <div class="card card-body">
+            <table class="table table-sm">
+                <tr>
+                    <th>First_name</th>
+                    <th>Last_name</th>
+                    <th>email</th>
 
-</body>
+                </tr>
+                {% for seller in sellers %}
+                <tr>
+                    <td>{{seller.first_name}}</td>
+                    <td>{{seller.last_name}}</td>
+                    <td>{{seller.email}}</td>
+
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </div>
+</div>
 </html>

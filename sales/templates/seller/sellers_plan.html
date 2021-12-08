@@ -5,6 +5,27 @@
     <title>Title</title>
 </head>
 <body>
-<h1>Sellers plan</h1>
-</body>
+<div class="row">
+    <div class="col-md">
+        <div class="card card-body">
+            <table class="table table-sm">
+                <tr>
+                    <th>Seller</th>
+                    <th>Amount</th>
+                    <th>Closing date</th>
+
+                </tr>
+                {% for plan in plans %}
+                <tr>
+                    <td>{{plan.seller}}</td>
+                    <td>{{plan.amount}}</td>
+                    <td>{{plan.closing_time}}</td>
+
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </div>
+</div></body>
 </html>

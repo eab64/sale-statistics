@@ -2,12 +2,14 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.contrib.auth.models import Group
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import RegisterForm, PlanForm
+from .forms import RegisterForm, PlanForm, SaleForm
 from .decorators import unauthenticated_user, allowed_users, admin_only
-from .models import Seller, Product, Sale
+from .models import Seller, Product, Sale, WeekPlan
+
+from django.contrib.auth.models import User
 
 
 @unauthenticated_user
@@ -58,7 +60,7 @@ def logoutUser(request):
 @login_required(login_url='login')
 @admin_only
 def home(request):
-    return render(request,'main.html')
+    return render(request, 'admin/admin_page.html')
 
 
 
@@ -88,14 +90,29 @@ def user_last_sales(request):
         render(request, 'seller/user_last_sales.html', context)
 
 def user_plan(request):
-    return render(request, 'seller/sellers_plan.html')
+    user = request.user
+    seller = Seller.objects.filter(user=user)[0]
+    plans = WeekPlan.objects.filter(seller=seller)
+    context = {'plans':plans}
+    return render(request, 'seller/sellers_plan.html', context)
+
+def add_sale(request):
+    '''Возможность создавать продажы'''
+    if request.method == "POST":
+        form = SaleForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('seller_page')
+    context = {'form':SaleForm}
+    return render(request, 'seller/add_sale.html', context)
 
 '''----------------------------------------------------------'''
 
 def all_sellers(request):
     '''Просто список отдаем всех юзеров с переходом вних'''
-    print(Seller.objects.all())
-    return render(request, 'admin/all_sellers.html')
+    sellers = Seller.objects.all()
+    context = {'sellers': sellers}
+    return render(request, 'admin/all_sellers.html', context)
 
 def last_10_sales(request):
     sales = Sale.objects.all().order_by('date_created')[:10]
@@ -110,10 +127,31 @@ def add_plan_to_seller(request):
         if form.is_valid():
             form.save()
             return redirect('home')
-    context = {'form': PlanForm()}
+    context = {'form': PlanForm}
     return render(request, 'admin/add_plan.html', context)
 
 def statistics(request):
-    """statistics of the best sellers
-    """
-    return render(request, 'admin/statistics.html')
+    """Вытащить всех продацев и их продажи
+    1. Пока что в форме просто принять диапазон дат и отдать график
+"""
+    data = {}
+    users = User.objects.filter(groups__name='seller')
+    for user in users:
+        seller = Seller.objects.filter(user=user)[0]
+        sales = Sale.objects.filter(seller=seller)
+        amount = sum([sale.product.price for sale in sales])
+        data[seller.first_name] = amount
+    context = {'data':data}
+
+    return render(request, 'admin/statistics.html', context)
+
+
+def result_data(request):
+    data = {}
+    users = User.objects.filter(groups__name='seller')
+    for user in users:
+        seller = Seller.objects.filter(user=user)[0]
+        sales = Sale.objects.filter(seller=seller)
+        amount = sum([sale.product.price for sale in sales])
+        data[seller.first_name] = amount
+    return JsonResponse(data)

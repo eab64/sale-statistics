@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import WeekPlan
+from .models import WeekPlan, Sale
 
 class RegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
@@ -17,3 +17,8 @@ class PlanForm(forms.ModelForm):
     class Meta:
         model = WeekPlan
         fields = ('seller', 'amount')
+
+class SaleForm(forms.ModelForm):
+    class Meta:
+        model = Sale
+        fields = ('seller', 'product')
