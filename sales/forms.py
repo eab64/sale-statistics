@@ -22,3 +22,7 @@ class SaleForm(forms.ModelForm):
     class Meta:
         model = Sale
         fields = ('seller', 'product')
+
+class DateForm(forms.Form):
+    from_date = forms.DateTimeField(label='Начала периода')
+    to_date = forms.DateTimeField(label='Конец периода')

@@ -20,6 +20,8 @@ urlpatterns = [
     path('statistics/', views.statistics, name='statistics'),
     path('resultsdata/', views.result_data, name = 'resultsdata'),
 
+    path('test_time_view/', views.test_date_view, name='test_time_view'),
+    path('resultsdata2/', views.ChartResultView.as_view()),
 
     path('home/', views.home, name = 'home')
 ]

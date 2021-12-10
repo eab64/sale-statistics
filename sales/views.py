@@ -5,12 +5,16 @@ from django.contrib.auth.models import Group
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import RegisterForm, PlanForm, SaleForm
+from rest_framework.decorators import api_view
+
+from .forms import RegisterForm, PlanForm, SaleForm, DateForm
 from .decorators import unauthenticated_user, allowed_users, admin_only
 from .models import Seller, Product, Sale, WeekPlan
 
 from django.contrib.auth.models import User
 
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 @unauthenticated_user
 def register(request):
@@ -134,24 +138,58 @@ def statistics(request):
     """Вытащить всех продацев и их продажи
     1. Пока что в форме просто принять диапазон дат и отдать график
 """
-    data = {}
-    users = User.objects.filter(groups__name='seller')
-    for user in users:
-        seller = Seller.objects.filter(user=user)[0]
-        sales = Sale.objects.filter(seller=seller)
-        amount = sum([sale.product.price for sale in sales])
-        data[seller.first_name] = amount
-    context = {'data':data}
-
+    if request.method == "POST":
+        form = DateForm(request.POST)
+        if form.is_valid():
+            from_date = form.cleaned_data['from_date']
+            to_date = form.cleaned_data['to_date']
+            context = {'from_date':from_date, 'to_date':to_date}
+            return render(request, 'admin/statistics.html', context)
+    context = {'form': DateForm}
     return render(request, 'admin/statistics.html', context)
 
+class ChartResultView(APIView):
+    def get(self, request):
+        data = {}
+        users = User.objects.filter(groups__name='seller')
+        for user in users:
+            seller = Seller.objects.filter(user=user)[0]
+            sales = Sale.objects.filter(seller=seller)
+            amount = sum([sale.product.price for sale in sales])
+            data[seller.first_name] = amount
+        return Response()
 
+from datetime import datetime
+
+@api_view(['GET', 'POST'])
 def result_data(request):
+    print(request)
+    datetimes = request.data
+    print('datetimes', datetimes)
+    # print('from_date', datetimes['from_date'])
+
     data = {}
     users = User.objects.filter(groups__name='seller')
     for user in users:
         seller = Seller.objects.filter(user=user)[0]
-        sales = Sale.objects.filter(seller=seller)
+        sales = Sale.objects.filter(seller=seller,
+                                    )
         amount = sum([sale.product.price for sale in sales])
         data[seller.first_name] = amount
     return JsonResponse(data)
+
+def test_date_view(request):
+    if request.method == "POST":
+        print('post')
+        form = DateForm(request.POST)
+        if form.is_valid():
+            print('valid')
+            from_date = form.cleaned_data['from_date']
+            to_date = form.cleaned_data['to_date']
+            print(from_date)
+            print(to_date)
+            context = {'from_date': from_date,
+                       'to_date':to_date}
+            return render(request, 'admin/statistics.html', context)
+    context = {'form': DateForm}
+    return render(request, 'test_time.html', context)

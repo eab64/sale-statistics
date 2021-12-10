@@ -1,66 +1,17 @@
-{% extends 'main.html' %}
-
-{% block content %}
-<script src="https://cdn.zingchart.com/zingchart.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
-
-<h1>hello</h1>
-
-<div id="myChart"></div>
-
 <script>
+    let user = {
+  name: 'John',
+  surname: 'Smith'
+};
+console.log(user)
+let response = await fetch('/resultsdata', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json;charset=utf-8'
+  },
+  body: JSON.stringify(user)
+});
 
-    //var need to take datetime range here
-
-    var state = {
-        'items':[],
-        'values':[]
-    }
-
-    var dataURL = `/resultsdata/`
-    $.ajax({
-        method:'GET',
-        url:dataURL,
-        success: function (response){
-            console.log('RESPONSE', response)
-			for (var i in response){
-                console.log(response[i])
-                console.log(i)
-				var key = i
-				var value =  response[i]
-
-				state.items.push(key)
-				state.values.push(value)
-			}
-            console.log('state',state)
-            buildChart()
-
-        }
-        }
-    )
-
-	function buildChart(){
-			var chartData = {
-			"type":"bar",
-			"scale-x":{
-				"values":state.items
-			}, 'series':[
-                {'values':state.values
-                    }
-                ]
-		}
-
-
-		zingchart.render({
-		  id: "myChart",
-		  data: chartData,
-		});
-	}
-
-
-
-
+let result = await response.json();
+alert(result.message);
 </script>
-{%  endblock%}
-
